@@ -14,9 +14,8 @@ public class BlockSpawner : MonoBehaviour {
     public float objectSpeed = 1000f;
     public List<GameObject> spawnedObjects;
     public float timeBetweenSpawns = 2f;
-    public float timeBetweenDespawn = 6f; // TODO further testing
     private float timeToSpawn = 2f;
-    private float timeToDespawn = 15f;
+    private int maximumAmountOfObstacles = 80;
 
     void FixedUpdate() {
         if(Time.time >= timeToSpawn) {
@@ -26,12 +25,12 @@ public class BlockSpawner : MonoBehaviour {
 
         var forwardForce = objectSpeed * objectSpeedMultiplier * Time.fixedDeltaTime;
         foreach(var block in spawnedObjects) {
+            block.GetComponent<Rigidbody>().freezeRotation = true;
             block.GetComponent<Rigidbody>().AddForce(0, 0, -forwardForce);
         }
 
-        if(Time.time >= timeToDespawn) {
-            DespawnObject();
-            timeToDespawn = Time.time + timeBetweenDespawn;
+        if(spawnedObjects.Count > maximumAmountOfObstacles) {
+            DespawnObjects();
         }
     }
     
@@ -52,8 +51,8 @@ public class BlockSpawner : MonoBehaviour {
         }
     }
 
-    private void DespawnObject() {
-        var amountOfObjectsToDespawn = spawnPoints.Length;
+    private void DespawnObjects() {        
+        var amountOfObjectsToDespawn = maximumAmountOfObstacles / 2;
         var listToDespawn = spawnedObjects.GetRange(0, amountOfObjectsToDespawn);
         foreach (var item in listToDespawn) {
             Destroy(item);
