@@ -70,7 +70,7 @@ PrefabInstance:
     - target: {fileID: 7247413669972720136, guid: c5a90f70920e1f148bb7574279c9fb6a,
         type: 3}
       propertyPath: m_Name
-      value: ObstacleQuadBlock
+      value: ObstacleQuadBlock Variant
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c5a90f70920e1f148bb7574279c9fb6a, type: 3}

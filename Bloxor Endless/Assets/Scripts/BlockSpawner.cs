@@ -6,14 +6,16 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class BlockSpawner : MonoBehaviour {
+
     public Transform[] spawnPoints;
     public GameObject blockPrefab;
-    public int freeSpaces = 1;
     [Range(1, 50)]
     public int objectSpeedMultiplier = 4;
+    public int freeSpaces = 1;
     public float objectSpeed = 1000f;
-    public List<GameObject> spawnedObjects;
     public float timeBetweenSpawns = 2f;
+    public List<GameObject> spawnedObjects;
+
     private float timeToSpawn = 2f;
     private int maximumAmountOfObstacles = 80;
 
