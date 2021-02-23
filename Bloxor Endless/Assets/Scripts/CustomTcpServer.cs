@@ -11,7 +11,7 @@ using UnityEngine;
 public class CustomTcpServer : MonoBehaviour {
     public string LocalIPAdress = ProjectConstants.TCP_IP;
     public int Port = ProjectConstants.TCP_PORT;
-    public BlockSpawner spawner;
+    public volatile BlockSpawner spawner;
     
     private Thread serverThread;
     private static CustomTcpServer instance = null;
@@ -22,7 +22,6 @@ public class CustomTcpServer : MonoBehaviour {
         } else {
             instance = this;
             DontDestroyOnLoad(gameObject);
-
             if (serverThread == null) {
                 serverThread = new Thread(() => RunServer());
                 serverThread.Start();
@@ -30,6 +29,7 @@ public class CustomTcpServer : MonoBehaviour {
             }
         }
 
+        spawner = GameObject.Find("BlockSpawner").GetComponent<BlockSpawner>();
         if (spawner == null) {
             serverThread.Join();
             serverThread = null;
@@ -59,12 +59,25 @@ public class CustomTcpServer : MonoBehaviour {
 
                 if (!string.IsNullOrEmpty(stringReceived) && spawner != null) {                    
                     var dataReceived = int.Parse(stringReceived);
+
+                    // replace this with a `level` system, utilizing timebetweenspawns, spawnpoints, different prefabs, maybe layers? 
+                    if (dataReceived < 10) {
+                        spawner.timeBetweenSpawns = 2f;
+                    } else if (dataReceived < 20) {
+                        spawner.timeBetweenSpawns = 1.25f;
+                    } else if (dataReceived < 30) {
+                        spawner.timeBetweenSpawns = 0.9f;
+                    } else if (dataReceived < 50) {
+                        spawner.timeBetweenSpawns = .5f;
+                    }
+
                     spawner.objectSpeedMultiplier = dataReceived;
                 }
-                // answer
-                //var response = "ACK"; // TODO possible errors -> different message
-                //networkStream.Write(buffer, 0, response.Length);
             }
         }
+    }
+
+    public void Notify(BlockSpawner newSpawner) {
+        spawner = newSpawner;
     }
 }

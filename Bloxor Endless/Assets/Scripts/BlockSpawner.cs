@@ -18,8 +18,21 @@ public class BlockSpawner : MonoBehaviour {
 
     private float timeToSpawn = 2f;
     private int maximumAmountOfObstacles = 80;
+    private BlockSpawner instance;
 
-    void FixedUpdate() {
+    private void Awake() {
+        if (instance != null && instance != this) {
+            Destroy(gameObject);
+        } else {
+            instance = this;
+            //DontDestroyOnLoad(gameObject);
+        }
+
+        var tcp = GameObject.Find("TCPServer").GetComponent<CustomTcpServer>();
+        tcp.Notify(this);
+    }
+
+    void FixedUpdate() {        
         if(Time.time >= timeToSpawn) {
             SpawnerLogic();
             timeToSpawn = Time.time + timeBetweenSpawns;
