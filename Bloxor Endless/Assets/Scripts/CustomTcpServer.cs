@@ -15,6 +15,7 @@ public class CustomTcpServer : MonoBehaviour {
     
     private Thread serverThread;
     private static CustomTcpServer instance = null;
+    private bool stopThread = false;
 
     private void Awake() {
         if (instance != null) {
@@ -50,7 +51,7 @@ public class CustomTcpServer : MonoBehaviour {
         // get data and read stream (in our case, should be something like "speed")
         var networkStream = client.GetStream();
 
-        while (true) {
+        while (!stopThread) {
             if (networkStream.DataAvailable) {
                 var buffer = new byte[client.ReceiveBufferSize];
                 var bytesRead = networkStream.Read(buffer, 0, client.ReceiveBufferSize);
@@ -75,9 +76,17 @@ public class CustomTcpServer : MonoBehaviour {
                 }
             }
         }
+        networkStream.Close();
+        client.Close();
+        listener.Stop();
     }
 
     public void Notify(BlockSpawner newSpawner) {
         spawner = newSpawner;
+    }
+
+    void OnApplicationQuit() {
+        stopThread = true;
+        serverThread.Join();
     }
 }

@@ -8,10 +8,10 @@ using Random = UnityEngine.Random;
 public class BlockSpawner : MonoBehaviour {
 
     public Transform[] spawnPoints;
-    public GameObject blockPrefab;
+    public List<GameObject> blockPrefabs = new List<GameObject>(4);
     [Range(1, 50)]
     public int objectSpeedMultiplier = 4;
-    public int freeSpaces = 1;
+    public int freeSpaces = 3;
     public float objectSpeed = 1000f;
     public float timeBetweenSpawns = 2f;
     public List<GameObject> spawnedObjects;
@@ -25,7 +25,6 @@ public class BlockSpawner : MonoBehaviour {
             Destroy(gameObject);
         } else {
             instance = this;
-            //DontDestroyOnLoad(gameObject);
         }
 
         var tcp = GameObject.Find("TCPServer").GetComponent<CustomTcpServer>();
@@ -50,17 +49,18 @@ public class BlockSpawner : MonoBehaviour {
     }
     
     void SpawnerLogic() {
+        // Select 3 random empty spawnpoints, fill the rest with random objects
         var amountOfSpawnPoints = spawnPoints.Length;
         var randomNumber = new System.Random();
-        var filteredList = Enumerable.Range(0, amountOfSpawnPoints).OrderBy(x => randomNumber.Next()).Take(3).ToList();
-        var randomIndex = Random.Range(0, amountOfSpawnPoints);
-        var randomIndex2 = Random.Range(0, amountOfSpawnPoints);
-        var randomIndex3 = Random.Range(0, amountOfSpawnPoints);
+        var filteredList = Enumerable.Range(0, amountOfSpawnPoints)
+            .OrderBy(x => randomNumber.Next())
+            .Take(freeSpaces).ToList();
         GameObject currentObstacle;
-
+        
         for (int i = 0; i < amountOfSpawnPoints; i++) {
             if (!filteredList.Contains(i)) {
-                currentObstacle = Instantiate(blockPrefab, spawnPoints[i].position, Quaternion.identity);
+                var randomPrefab = randomNumber.Next(blockPrefabs.Count);
+                currentObstacle = Instantiate(blockPrefabs[randomPrefab], spawnPoints[i].position, Quaternion.identity);
                 spawnedObjects.Add(currentObstacle);
             }
         }
@@ -69,9 +69,11 @@ public class BlockSpawner : MonoBehaviour {
     private void DespawnObjects() {        
         var amountOfObjectsToDespawn = maximumAmountOfObstacles / 2;
         var listToDespawn = spawnedObjects.GetRange(0, amountOfObjectsToDespawn);
+
         foreach (var item in listToDespawn) {
             Destroy(item);
         }
+
         spawnedObjects.RemoveRange(0, amountOfObjectsToDespawn);
     }
 
