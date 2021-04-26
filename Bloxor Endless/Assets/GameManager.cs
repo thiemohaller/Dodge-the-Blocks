@@ -1,5 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Assets;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -10,7 +10,8 @@ public class GameManager : MonoBehaviour {
     public float slowDown = 10f;
 
     public void GameOver() {
-        if(gameHasEnded == false) {
+        if (gameHasEnded == false) {
+            GameObject.Find("TCPServer").GetComponent<DeathCounter>().IncreaseDeathCounter();
             Debug.Log("Game Over :(");
             gameHasEnded = true;
             Invoke(nameof(Restart), restartDelay);

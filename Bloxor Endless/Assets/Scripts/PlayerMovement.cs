@@ -18,15 +18,15 @@ public class PlayerMovement : MonoBehaviour
 
         // game over by falling off
         if(rigidbody.position.y < -1) {
-            FindObjectOfType<GameManager>().GameOver();
+            NotifyGameManagerOfGameOver();
         }
 
         if (rigidbody.position.x < -8 || rigidbody.position.x > 8) {
-            FindObjectOfType<GameManager>().GameOver();
+            NotifyGameManagerOfGameOver();
         }
     }
 
-    void OnCollisionEnter2D() {
+    void NotifyGameManagerOfGameOver() {
         FindObjectOfType<GameManager>().GameOver();
     }
 }
