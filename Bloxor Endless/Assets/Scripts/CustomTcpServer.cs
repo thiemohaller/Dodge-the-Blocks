@@ -59,44 +59,48 @@ public class CustomTcpServer : MonoBehaviour {
         var iterationCounter = 0;
 
         while (!stopThread) {
-            if (iterationCounter % 30 == 0) {
-                var stringToSend = deathCounter.ResetCounter.ToString();
-                var bytesToSend = Encoding.ASCII.GetBytes(stringToSend);
-                networkStream.Write(bytesToSend, 0, bytesToSend.Length);
-                Debug.Log($"Send string `{stringToSend}`.");
-            }
+            try { 
+                if (iterationCounter % 10 == 0) {
+                    var stringToSend = deathCounter.ResetCounter.ToString();
+                    var bytesToSend = Encoding.ASCII.GetBytes(stringToSend);
+                    networkStream.Write(bytesToSend, 0, bytesToSend.Length);
+                    Debug.Log($"Send string `{stringToSend}`.");
+                }
 
-            if (networkStream.DataAvailable) {
-                var buffer = new byte[client.ReceiveBufferSize];
-                var bytesRead = networkStream.Read(buffer, 0, client.ReceiveBufferSize);
-                var stringReceived = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-                Debug.Log($"Received string `{stringReceived}` from client with IP {client.Client.RemoteEndPoint}.");
+                if (networkStream.DataAvailable) {
+                    var buffer = new byte[client.ReceiveBufferSize];
+                    var bytesRead = networkStream.Read(buffer, 0, client.ReceiveBufferSize);
+                    var stringReceived = Encoding.ASCII.GetString(buffer, 0, bytesRead);
+                    Debug.Log($"Received string `{stringReceived}` from client with IP {client.Client.RemoteEndPoint}.");
 
-                if (!string.IsNullOrEmpty(stringReceived) && spawner != null) {                    
-                    var dataReceived = int.Parse(stringReceived);
+                    if (!string.IsNullOrEmpty(stringReceived) && spawner != null) {                    
+                        var dataReceived = int.Parse(stringReceived);
 
-                    spawner.objectSpeedMultiplier = dataReceived;
+                        spawner.objectSpeedMultiplier = dataReceived;
 
-                    // replace this with a `level` system, utilizing timebetweenspawns, spawnpoints, different prefabs, maybe layers (=rapid successive waves of spawns)? 
-                    if (dataReceived < 10) {
-                        spawner.timeBetweenSpawns = 2f;
-                        spawner.freeSpaces = 3;
-                    } else if (dataReceived < 20) {
-                        spawner.timeBetweenSpawns = 1.25f;
-                        spawner.freeSpaces = 2;
-                    } else if (dataReceived < 30) {
-                        spawner.timeBetweenSpawns = 0.9f;
-                        spawner.freeSpaces = 2;
-                    } else if (dataReceived < 50) {
-                        spawner.timeBetweenSpawns = .5f;
-                        spawner.freeSpaces = 2;
+                        // replace this with a `level` system, utilizing timebetweenspawns, spawnpoints, different prefabs, maybe layers (=rapid successive waves of spawns)? 
+                        if (dataReceived < 10) {
+                            spawner.timeBetweenSpawns = 2f;
+                            spawner.freeSpaces = 3;
+                        } else if (dataReceived < 20) {
+                            spawner.timeBetweenSpawns = 1.25f;
+                            spawner.freeSpaces = 2;
+                        } else if (dataReceived < 30) {
+                            spawner.timeBetweenSpawns = 0.9f;
+                            spawner.freeSpaces = 2;
+                        } else if (dataReceived < 50) {
+                            spawner.timeBetweenSpawns = .5f;
+                            spawner.freeSpaces = 2;
+                        }
                     }
                 }
+
+                Thread.Sleep(100);
+
+                iterationCounter += 1;
+            } catch (Exception ex) {
+                Debug.Log($"Exception occured: {ex.Message}, {ex.StackTrace}");
             }
-
-            Thread.Sleep(100);
-
-            iterationCounter += 1;
         }
 
         networkStream.Close();
@@ -109,6 +113,7 @@ public class CustomTcpServer : MonoBehaviour {
     }
 
     void OnApplicationQuit() {
+        Destroy(this);
         //stopThread = true;
         //serverThread.Join();
     }

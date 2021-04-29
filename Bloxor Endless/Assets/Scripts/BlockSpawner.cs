@@ -19,6 +19,7 @@ public class BlockSpawner : MonoBehaviour {
     private float timeToSpawn = 2f;
     private int maximumAmountOfObstacles = 80;
     private BlockSpawner instance;
+    private List<int> previousSpawns;
 
     private void Awake() {
         if (instance != null && instance != this) {
@@ -29,6 +30,7 @@ public class BlockSpawner : MonoBehaviour {
 
         var tcp = GameObject.Find("TCPServer").GetComponent<CustomTcpServer>();
         tcp.Notify(this);
+        previousSpawns = new List<int>();
     }
 
     void FixedUpdate() {        
@@ -53,15 +55,27 @@ public class BlockSpawner : MonoBehaviour {
         var amountOfSpawnPoints = spawnPoints.Length;
         var randomNumber = new System.Random();
         var filteredList = Enumerable.Range(0, amountOfSpawnPoints)
+            .Except(previousSpawns)
             .OrderBy(x => randomNumber.Next())
             .Take(freeSpaces).ToList();
+
         GameObject currentObstacle;
         
+        previousSpawns.Clear();
+
         for (int i = 0; i < amountOfSpawnPoints; i++) {
             if (!filteredList.Contains(i)) {
                 var randomPrefab = randomNumber.Next(blockPrefabs.Count);
                 currentObstacle = Instantiate(blockPrefabs[randomPrefab], spawnPoints[i].position, Quaternion.identity);
                 spawnedObjects.Add(currentObstacle);
+            } else {
+                // this yields a 10% chance of having the same hole twice in a row
+                var rand = new System.Random();
+                var chance = rand.Next(1, 101);
+
+                if (chance <= 90) {
+                    previousSpawns.Add(i);
+                }
             }
         }
     }
