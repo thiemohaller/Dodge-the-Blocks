@@ -12,6 +12,7 @@ public class CustomTcpServer : MonoBehaviour {
     public string LocalIPAdress = ProjectConstants.TCP_IP;
     public int Port = ProjectConstants.TCP_PORT;
     public volatile BlockSpawner spawner;
+    public double DeltaDistance { get; set; }
 
     private Thread serverThread;
     private static CustomTcpServer instance = null;

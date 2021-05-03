@@ -15,9 +15,7 @@ public class PlayerCollision : MonoBehaviour
         if (collision.collider.CompareTag("GapTrigger")) {
             var otherGameobject = collision.gameObject;
             otherGameobject.SetActive(false);
-            Debug.Log("Hit gap collider");
             blockSpawner.Notify(collision.gameObject);
-            //Destroy(collision.gameObject);
         }
 
         if(collision.collider.CompareTag("Obstacle")) {

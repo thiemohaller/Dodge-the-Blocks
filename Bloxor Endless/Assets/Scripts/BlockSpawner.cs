@@ -24,12 +24,15 @@ public class BlockSpawner : MonoBehaviour {
     private BlockSpawner instance;
     private List<int> previousSpawns;
     private int iterationCounter = 0;
-    private Dictionary<int, List<GameObject>> spawnIterations = new Dictionary<int, List<GameObject>>();
+    private List<List<GameObject>> listOfSpawnedGapsPerIteration = new List<List<GameObject>>();
     private Dictionary<int, (GameObject, float)> closestColliderToPlayerInCurrentIteration = new Dictionary<int, (GameObject, float)>();
     private Dictionary<int, ClosestSpawnAndDistanceTravelledDto> dtoPerIterationDictionary = new Dictionary<int, ClosestSpawnAndDistanceTravelledDto>();
     private List<GameObject> collidersHit = new List<GameObject>();
-    private List<int> iterationsAlreadyProcessed = new List<int>();
     private GameObject player;
+    private float xToClosestGap;
+    private double distanceTravelled;
+    private Vector3 previousPlayerPosition;
+    private CustomTcpServer tcp;
 
     private void Awake() {
         if (instance != null && instance != this) {
@@ -38,7 +41,7 @@ public class BlockSpawner : MonoBehaviour {
             instance = this;
         }
 
-        var tcp = GameObject.Find("TCPServer").GetComponent<CustomTcpServer>();
+        tcp = GameObject.Find("TCPServer").GetComponent<CustomTcpServer>();
         tcp.Notify(this);
         
         previousSpawns = new List<int>();
@@ -58,54 +61,12 @@ public class BlockSpawner : MonoBehaviour {
             block.GetComponent<Rigidbody>().AddForce(0, 0, -forwardForce);
         }
 
-        CheckForXTravel();
+        var currentPlayerPosition = player.transform.position;
+        distanceTravelled += Math.Abs(currentPlayerPosition.x - previousPlayerPosition.x);
+        previousPlayerPosition = currentPlayerPosition;
 
         if(spawnedObjects.Count > maximumAmountOfObstacles) {
             DespawnObjects();
-        }
-    }
-
-    private void CheckForXTravel() {
-        var tempList = new List<GameObject>();
-        foreach (var collider in collidersHit) {
-
-            if (collider.GetComponent<Rigidbody>().position.z < 0) {
-                //SetTcpLatestDelta();
-                collidersHit.Remove(collider);
-            }
-
-            //var dictEntry = spawnIterations.FirstOrDefault(x => x.Value.Contains(collider));
-            var dictEntry2 = dtoPerIterationDictionary.Where(x => x.Value.ClosestSpawn = collider).FirstOrDefault();
-
-            if (!iterationsAlreadyProcessed.Contains(dictEntry2.Key)) {
-                Debug.Log($"Found entry in iteration: {dictEntry2.Key}");
-                ProcessEntry(dictEntry2.Key);
-                iterationsAlreadyProcessed.Add(dictEntry2.Key);
-            }
-
-            /*
-            if (!iterationsAlreadyProcessed.Contains(dictEntry.Key)) {
-                Debug.Log($"Found entry in iteration: {dictEntry.Key}");
-                ProcessEntry(dictEntry.Key);
-                iterationsAlreadyProcessed.Add(dictEntry.Key);
-            }
-            */
-
-            tempList.Add(collider);
-        }
-
-        foreach (var item in tempList) {
-            collidersHit.Remove(item);
-        }
-    }
-
-    private void ProcessEntry(int key) {
-        if (dtoPerIterationDictionary.TryGetValue(key, out var value)) {
-            var previousPosition = value.PreviousPlayerPosition;
-            var currentPosition = GameObject.Find("Player").GetComponent<Rigidbody>().position;
-            var distanceTravelled = value.DistanceTraveledByPlayer + Math.Abs(currentPosition.x - previousPosition.x);
-            value.DistanceTraveledByPlayer = distanceTravelled;
-            value.PreviousPlayerPosition = currentPosition;
         }
     }
 
@@ -143,29 +104,7 @@ public class BlockSpawner : MonoBehaviour {
             spawnedObjects.Add(currentObstacle);
         }
 
-        spawnIterations.Add(iterationCounter, spawnWaveGaps);
-
-        var listOfDistances = new List<(GameObject gap, float distanceToPlayer)>();
-        foreach (var gap in spawnIterations[iterationCounter]) {
-            var distance = Vector3.Distance(gap.transform.position, player.transform.position);
-            var tuple = (gap, distance);
-            listOfDistances.Add(tuple);
-        }
-
-        var entryWithSmallestDistance = listOfDistances.OrderBy(x => x.distanceToPlayer).First();        
-        closestColliderToPlayerInCurrentIteration.Add(iterationCounter, entryWithSmallestDistance);
-
-        var currentPlayerPosition = GameObject.Find("Player").GetComponent<Rigidbody>().position;
-
-        var dto = new ClosestSpawnAndDistanceTravelledDto {
-            ClosestSpawn = entryWithSmallestDistance.gap,
-            DistanceBetweenSpawnAndPlayer = entryWithSmallestDistance.distanceToPlayer
-        };
-
-        dtoPerIterationDictionary.Add(iterationCounter, dto);
-
-        Debug.Log($"closest spawnpoint in iteration {iterationCounter} is spawn {entryWithSmallestDistance.gap.transform.position} with a distance of {entryWithSmallestDistance.distanceToPlayer}");
-        iterationCounter += 1;
+        listOfSpawnedGapsPerIteration.Add(spawnWaveGaps);
     }
 
     private void DespawnObjects() {        
@@ -181,6 +120,21 @@ public class BlockSpawner : MonoBehaviour {
 
     public void Notify(GameObject gameObject) {
         collidersHit.Add(gameObject);
+        var spawnedGaps = listOfSpawnedGapsPerIteration.FirstOrDefault();
+        tcp.DeltaDistance = Math.Abs(xToClosestGap - distanceTravelled);
+        listOfSpawnedGapsPerIteration.Remove(spawnedGaps);
+
+        var listOfDistances = new List<float>();
+        foreach (var gap in spawnedGaps) {
+            var distance = Math.Abs(gap.transform.position.x - previousPlayerPosition.x);
+            listOfDistances.Add(distance);
+        }
+
+        Debug.Log($"Previous distance travelled: {distanceTravelled}");
+        listOfDistances.Sort();
+        xToClosestGap = listOfDistances.FirstOrDefault();
+        distanceTravelled = 0;
+        Debug.Log($"Distance to closest gap: {xToClosestGap}");
     }
 }
  
