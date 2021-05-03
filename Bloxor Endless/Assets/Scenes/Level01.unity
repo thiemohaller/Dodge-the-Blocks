@@ -297,6 +297,8 @@ MonoBehaviour:
   - {fileID: 71832025}
   - {fileID: 1675723761}
   - {fileID: 1819598814}
+  gapTriggerPrefab: {fileID: 3963216715500086581, guid: cc94900d519b2b946a7029f633ca6ada,
+    type: 3}
   blockPrefabs:
   - {fileID: 1306525585619336083, guid: 3475751b7c2c6f14c8efcc6ce4f22c13, type: 3}
   - {fileID: 887437526523709831, guid: 2b39d3c780580014e949c8082673ab86, type: 3}
@@ -359,7 +361,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   restartDelay: 2
   slowDown: 10
-  tcpServer: {fileID: 1862756861}
 --- !u!4 &417528595
 Transform:
   m_ObjectHideFlags: 0
@@ -1199,6 +1200,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movementScript: {fileID: 1579827587}
+  blockSpawner: {fileID: 0}
 --- !u!1 &1675723760
 GameObject:
   m_ObjectHideFlags: 0

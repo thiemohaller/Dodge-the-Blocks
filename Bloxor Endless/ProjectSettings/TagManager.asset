@@ -6,6 +6,7 @@ TagManager:
   tags:
   - System
   - Obstacle
+  - GapTrigger
   layers:
   - Default
   - TransparentFX
