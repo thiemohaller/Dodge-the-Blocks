@@ -62,7 +62,7 @@ public class CustomTcpServer : MonoBehaviour {
         while (!stopThread) {
             try { 
                 if (iterationCounter % 10 == 0) {
-                    var stringToSend = deathCounter.ResetCounter.ToString();
+                    var stringToSend = deathCounter.ResetCounter.ToString() + ',' + DeltaDistance.ToString();
                     var bytesToSend = Encoding.ASCII.GetBytes(stringToSend);
                     networkStream.Write(bytesToSend, 0, bytesToSend.Length);
                     Debug.Log($"Send string `{stringToSend}`.");
@@ -80,10 +80,13 @@ public class CustomTcpServer : MonoBehaviour {
                         spawner.objectSpeedMultiplier = dataReceived;
 
                         // replace this with a `level` system, utilizing timebetweenspawns, spawnpoints, different prefabs, maybe layers (=rapid successive waves of spawns)? 
-                        if (dataReceived < 10) {
+                        if (dataReceived < 8) {
                             spawner.timeBetweenSpawns = 2f;
                             spawner.freeSpaces = 3;
-                        } else if (dataReceived < 20) {
+                        } else if (dataReceived < 12) {
+                            spawner.timeBetweenSpawns = 1.5f;
+                            spawner.freeSpaces = 2;
+                        }else if (dataReceived < 20) {
                             spawner.timeBetweenSpawns = 1.25f;
                             spawner.freeSpaces = 2;
                         } else if (dataReceived < 30) {
