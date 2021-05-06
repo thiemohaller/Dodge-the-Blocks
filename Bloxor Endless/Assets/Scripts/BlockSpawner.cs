@@ -1,10 +1,7 @@
-﻿using Assets.Scripts.DTO;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class BlockSpawner : MonoBehaviour {
 
@@ -23,11 +20,7 @@ public class BlockSpawner : MonoBehaviour {
     private int maximumAmountOfObstacles = 80;
     private BlockSpawner instance;
     private List<int> previousSpawns;
-    private int iterationCounter = 0;
     private List<List<GameObject>> listOfSpawnedGapsPerIteration = new List<List<GameObject>>();
-    private Dictionary<int, (GameObject, float)> closestColliderToPlayerInCurrentIteration = new Dictionary<int, (GameObject, float)>();
-    private Dictionary<int, ClosestSpawnAndDistanceTravelledDto> dtoPerIterationDictionary = new Dictionary<int, ClosestSpawnAndDistanceTravelledDto>();
-    private List<GameObject> collidersHit = new List<GameObject>();
     private GameObject player;
     private float xToClosestGap;
     private double distanceTravelled;
@@ -119,7 +112,6 @@ public class BlockSpawner : MonoBehaviour {
     }
 
     public void Notify(GameObject gameObject) {
-        collidersHit.Add(gameObject);
         var spawnedGaps = listOfSpawnedGapsPerIteration.FirstOrDefault();
         tcp.DeltaDistance = Math.Abs(xToClosestGap - distanceTravelled);
         listOfSpawnedGapsPerIteration.Remove(spawnedGaps);
