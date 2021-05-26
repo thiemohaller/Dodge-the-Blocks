@@ -8,8 +8,8 @@ public class Score : MonoBehaviour {
     public Text activeSpawnsText;
     public int multiplier = 10;
     public BlockSpawner spawner;
+    public double score;
 
-    private double score;
     private double timer;
 
     private void Start() {

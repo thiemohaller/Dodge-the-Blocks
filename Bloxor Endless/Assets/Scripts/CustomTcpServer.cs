@@ -80,7 +80,7 @@ public class CustomTcpServer : MonoBehaviour {
                         // replace this with a `level` system, utilizing timebetweenspawns, spawnpoints, different prefabs, maybe layers (=rapid successive waves of spawns)? 
                         if (dataReceived < 10) {
                             spawner.timeBetweenSpawns = 2f;
-                            spawner.freeSpaces = 3;
+                            spawner.freeSpaces = 2;
                         } else if (dataReceived < 12) {
                             spawner.timeBetweenSpawns = 1.5f;
                             spawner.freeSpaces = 2;

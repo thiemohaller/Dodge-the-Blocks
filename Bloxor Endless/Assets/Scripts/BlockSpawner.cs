@@ -12,6 +12,7 @@ public class BlockSpawner : MonoBehaviour {
     public int objectSpeedMultiplier = 4;
     public int freeSpaces = 3;
     public float objectSpeed = 1000f;
+    public Score scoreScript;
 
     public float timeBetweenSpawns = 2f;
     public List<GameObject> spawnedObjects;
@@ -23,6 +24,7 @@ public class BlockSpawner : MonoBehaviour {
     private List<List<GameObject>> listOfSpawnedGapsPerIteration = new List<List<GameObject>>();
     private GameObject player;
     private float xToClosestGap;
+    private GameObject closestGap;
     private double distanceTravelled;
     private Vector3 previousPlayerPosition;
     private CustomTcpServer tcp;
@@ -111,20 +113,34 @@ public class BlockSpawner : MonoBehaviour {
         spawnedObjects.RemoveRange(0, amountOfObjectsToDespawn);
     }
 
-    public void Notify(GameObject gameObject) {
+    public void Notify(GameObject gapGameObject) {
         var spawnedGaps = listOfSpawnedGapsPerIteration.FirstOrDefault();
         tcp.DeltaDistance = Math.Abs(xToClosestGap - distanceTravelled);
         listOfSpawnedGapsPerIteration.Remove(spawnedGaps);
 
         var listOfDistances = new List<float>();
+        var distanceGapDict = new Dictionary<float, GameObject>();
+        
+        try {
+            if (gapGameObject.GetInstanceID() == closestGap.GetInstanceID()) {
+                scoreScript.score += 5;
+                scoreScript.scoreText.text = scoreScript.score.ToString();
+            }
+        } catch (Exception) {
+            
+        }
+
         foreach (var gap in spawnedGaps) {
             var distance = Math.Abs(gap.transform.position.x - previousPlayerPosition.x);
             listOfDistances.Add(distance);
+            distanceGapDict.Add(distance, gap);
         }
 
         Debug.Log($"Previous distance travelled: {distanceTravelled}");
         listOfDistances.Sort();
+        var sortedDistanceGapDict = new SortedDictionary<float, GameObject>(distanceGapDict);
         xToClosestGap = listOfDistances.FirstOrDefault();
+        closestGap = sortedDistanceGapDict.FirstOrDefault().Value;
         distanceTravelled = 0;
         Debug.Log($"Distance to closest gap: {xToClosestGap}");
     }
